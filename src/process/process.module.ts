@@ -23,6 +23,8 @@ import {
   PhoneOrderSchema,
 } from 'src/schemas/ventas/orders/phoneOrder.schema';
 import { Notes, NoteSchema } from 'src/schemas/ventas/notes.schema';
+import { OperatingPeriodModule } from 'src/operating-period/operating-period.module';
+import { BillsModule } from 'src/ventas/bills/bills.module';
 
 @Module({
   imports: [
@@ -60,7 +62,13 @@ import { Notes, NoteSchema } from 'src/schemas/ventas/notes.schema';
         name: Notes.name,
         schema: NoteSchema,
       },
+      {
+        name: OperatingPeriod.name,
+        schema: OperatingPeriodSchema,
+      },
     ]),
+    OperatingPeriodModule,
+    BillsModule,
   ],
   controllers: [ProcessController],
   providers: [ProcessService, OperatingPeriodService, BillsService],

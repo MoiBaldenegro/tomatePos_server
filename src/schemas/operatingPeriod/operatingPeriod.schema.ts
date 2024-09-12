@@ -3,6 +3,7 @@ import { DailyRegister } from '../dailyRegister/createDailyRegister';
 import { Schema as MongooseSchema } from 'mongoose';
 import { CashierSession } from '../cashierSession/cashierSession';
 import { OperationalClousure } from './operationalClousure';
+import { User } from '../users.schema';
 
 interface CashIn {
   init: boolean;
@@ -93,8 +94,10 @@ export class OperatingPeriod {
   // Aquí solo referenciamos la clase
   @Prop({ type: OperationalClousure })
   operationalClousure?: OperationalClousure;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  approvedBy?: User;
 }
-// todo: agregar todas las propiedades necsarias para el reporte final de cierre de periodo
 
 export const OperatingPeriodSchema =
   SchemaFactory.createForClass(OperatingPeriod);

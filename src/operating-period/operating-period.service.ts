@@ -21,7 +21,7 @@ export class OperatingPeriodService {
     return this.operatingPeriodModel.find();
   }
 
-  async getCurrent() {
+  async getCurrent(id?: string) {
     const session = await this.branchModel.startSession();
     session.startTransaction();
     try {
@@ -32,8 +32,9 @@ export class OperatingPeriodService {
       if (!branch) {
         throw new Error('No se encontro la branch');
       }
+      const periodId = id ?? branch.operatingPeriod;
       const operatingPeriod = await this.operatingPeriodModel
-        .findById(branch.operatingPeriod)
+        .findById(periodId)
         .populate({
           path: 'sellProcess',
           populate: [
@@ -105,13 +106,45 @@ export class OperatingPeriodService {
       );
       console.log(updatedPeriod);
       if (!updatedPeriod) {
-        console.log('llegue aca');
-
+        await session.abortTransaction();
+        session.endSession();
         throw new Error('No se pudo actualizar el periodo operativo');
       }
       await session.commitTransaction();
       session.endSession();
       return updatedPeriod;
     } catch (error) {}
+  }
+
+  async approvePeriod(id: string = '', body: any) {
+    const session = await this.operatingPeriodModel.startSession();
+    session.startTransaction();
+    try {
+      // TRAEREMOS EL MONTO TOTAL DE VENTAS
+      const updatedPeriod = await this.operatingPeriodModel
+        .findByIdAndUpdate(
+          id,
+          {
+            operationalClousure: { ...templateClosing, state: State.CLOSED },
+            approvedBy: body.userId,
+          },
+          { new: true },
+        )
+        .populate({
+          path: 'approvedBy',
+        });
+      if (!updatedPeriod) {
+        await session.abortTransaction();
+        session.endSession();
+        throw new Error('No se pudo actualizar el periodo operativo');
+      }
+      await session.commitTransaction();
+      session.endSession();
+      return updatedPeriod;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
   }
 }

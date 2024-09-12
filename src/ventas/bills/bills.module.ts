@@ -66,5 +66,6 @@ import { Branch, BranchSchema } from 'src/schemas/business/branchSchema';
   ],
   controllers: [BillsController],
   providers: [BillsService, OperatingPeriodService],
+  exports: [BillsService],
 })
 export class BillsModule {}

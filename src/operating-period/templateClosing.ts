@@ -1,5 +1,5 @@
 export const templateClosing = {
-  state: 'ACTIVE',
+  state: 'CLOSED',
   totalSellsAmount: '1000.00',
   totalRestaurantAmount: '500.00',
   totalToGoAmount: '200.00',

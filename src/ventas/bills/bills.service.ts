@@ -13,7 +13,6 @@ import {
 import { Notes } from 'src/schemas/ventas/notes.schema';
 import { OperatingPeriod } from 'src/schemas/operatingPeriod/operatingPeriod.schema';
 import { OperatingPeriodService } from 'src/operating-period/operating-period.service';
-import { ENABLE_STATUS } from 'src/libs/status.libs';
 import { PhoneOrder } from 'src/schemas/ventas/orders/phoneOrder.schema';
 import { RappiOrder } from 'src/schemas/ventas/orders/rappiOrder.schema';
 import { ToGoOrder } from 'src/schemas/ventas/orders/toGoOrder.schema';
@@ -362,11 +361,15 @@ export class BillsService {
     }
   }
   // echar a andar este metodo
-  async findCurrent() {
+  async findCurrent(id?: string) {
     const session = await this.operatingPeriodModel.startSession();
     session.startTransaction();
     try {
-      const currentPeriod = await this.operatingPeriodService.getCurrent();
+      const currentPeriod = id
+        ? await this.operatingPeriodService.getCurrent(id)
+        : await this.operatingPeriodService.getCurrent();
+
+      console.log('currentPeriod', currentPeriod);
       if (!currentPeriod) {
         throw new NotFoundException(
           'No se encontro ningun periodo actualmente',
@@ -424,6 +427,8 @@ export class BillsService {
         ...rappiOrders,
         ...phoneOrders,
       ];
+      console.log(` allOrders ${allOrders}`);
+      await session.commitTransaction();
       session.endSession();
       return allOrders;
     } catch (error) {

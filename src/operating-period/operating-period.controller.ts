@@ -1,9 +1,9 @@
 import {
+  Body,
   Controller,
   Get,
   NotFoundException,
   Param,
-  Post,
   Put,
 } from '@nestjs/common';
 import { OperatingPeriodService } from './operating-period.service';
@@ -62,6 +62,22 @@ export class OperatingPeriodController {
   async closePeriod(@Param('id') id: string) {
     try {
       const res = await this.operatingPeriodService.closePeriod(id);
+      if (!res) {
+        throw new NotFoundException('No se ha podido cerrar el periodo');
+      }
+      return res;
+    } catch (error) {
+      throw new NotFoundException(
+        `Ha ocurrido algo inesperado. Mas informacion: ${error}`,
+      );
+    }
+  }
+
+  // controller para aprovar un periodo
+  @Put('approve-period/:id')
+  async approvePeriod(@Param('id') id: string, @Body() body: any) {
+    try {
+      const res = await this.operatingPeriodService.approvePeriod(id, body);
       if (!res) {
         throw new NotFoundException('No se ha podido cerrar el periodo');
       }

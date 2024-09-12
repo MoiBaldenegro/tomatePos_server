@@ -25,12 +25,35 @@ export class ProcessService {
       const filterOrders = allOrders.filter(
         (order) => order.status != CANCELLED_STATUS,
       );
-      const sellTotal = filterOrders?.reduce((acc, order) => {
-        return acc + parseFloat(order.checkTotal);
-      }, 0);
+      const sellTotal =
+        filterOrders?.reduce((acc, order) => {
+          return acc + parseFloat(order.checkTotal);
+        }, 0) ?? 0.0;
+
       await session.commitTransaction();
       session.endSession();
-      return sellTotal ?? 0;
+      return sellTotal ?? 0.0;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
+  };
+  totalPeriodSells = async (id: string) => {
+    const session = await this.operatingModel.startSession();
+    session.startTransaction();
+    try {
+      const allOrders = await this.billsService.findCurrent(id);
+      const filterOrders = allOrders.filter(
+        (order) => order.status != CANCELLED_STATUS,
+      );
+      const sellTotal =
+        filterOrders?.reduce((acc, order) => {
+          return acc + parseFloat(order.checkTotal);
+        }, 0) ?? 0.0;
+      await session.commitTransaction();
+      session.endSession();
+      return sellTotal ?? 0.0;
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
@@ -53,8 +76,6 @@ export class ProcessService {
           session.togoorders,
         );
       }, []);
-
-      console.log(allOrders.length);
 
       await session.commitTransaction();
       session.endSession();
